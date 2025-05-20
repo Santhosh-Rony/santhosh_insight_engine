@@ -19,10 +19,11 @@ It uses a custom RAG (Retrieval-Augmented Generation) pipeline to extract, embed
 
 ## 🧱 Architecture Overview
 
+```bash 
 file_extractor(extracts text/content from document) ---> embedder(generates embeddings of the text) ---> Dataframe:main(creating dataframe for the text, metadata and embeddings) ---> qdrant_inserting(connect to qdrant, create collection in qdrant, and insert embeddings into qdrant with df) ---> rag(convert the user query into embedding, perform similarity search on qdrant and getting the text based data, Now passing that text retrieved fromt qdrant and query_text to the openAI client) ---> final response(main.py)
 
 ---
-
+```bash 
 ## ⚙️ Setup Instructions
 
 ### 🔗 Prerequisites
@@ -30,7 +31,7 @@ file_extractor(extracts text/content from document) ---> embedder(generates embe
 - **Docker** installed and running on your machine
 - Pull and run Qdrant using Docker:
 
-```bash 1.Pull 2.Only using HTTP API 3.Using both HTTP and gRPC APIs (choose explictly)
+1.Pull 2.Only using HTTP API 3.Using both HTTP and gRPC APIs (choose explictly)
 docker pull qdrant/qdrant
 docker run -p 6333:6333 qdrant/
 docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant  
