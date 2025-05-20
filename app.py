@@ -113,7 +113,7 @@ get_answer = st.button("Get Answer")
 # Response section
 if get_answer and query:
     st.markdown("<div class='response-card'>", unsafe_allow_html=True)
-    st.markdown(f"<h4>Question:</h4><p>{query}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p>Question:</p><p>{query}</p>", unsafe_allow_html=True)
     with st.spinner("Processing your question..."):
         buf = io.StringIO()
         old_stdout = sys.stdout
@@ -123,7 +123,7 @@ if get_answer and query:
         answer = result if result else buf.getvalue().strip()
         if not answer:
             answer = "No answer returned. Check your RAG pipeline implementation."
-    st.markdown(f"<h4>Answer:</h4><p>{answer}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p>{answer}</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # Footer
