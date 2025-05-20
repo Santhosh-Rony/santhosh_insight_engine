@@ -74,7 +74,7 @@ This repository contains three distinct implementations of a document-based QA e
 
 ```bash
 # 1. Clone this repository
-git clone https://github.com/<your-org>/santhosh_insight_engine.git
+git clone https://github.com/Santhosh-Rony/santhosh_insight_engine.git
 cd santhosh_insight_engine
 
 # 2. Switch to python branch
@@ -163,6 +163,8 @@ streamlit run app.py
 3. Commit your changes (`git commit -m "Add YourFeature"`)
 4. Push to the branch (`git push origin feature/YourFeature`)
 5. Open a Pull Request
+
+#### Note : You must have your own 'OpenAI API key'
 
 ## License
 
