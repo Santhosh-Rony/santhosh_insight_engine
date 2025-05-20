@@ -21,13 +21,12 @@ It uses a custom RAG (Retrieval-Augmented Generation) pipeline to extract, embed
 
 ```mermaid
 flowchart LR
-  FE[file_extractor\n(extracts text/content from document)] --> EM[embedder\n(generates embeddings of the text)]
-  EM --> DF[DataFrame:main\n(creating dataframe for the text, metadata and embeddings)]
-  DF --> QI[qdrant_inserting\n(connect to qdrant, create collection in qdrant, and insert embeddings into qdrant with df)]
-  QI --> RP[rag\n(convert the user query into embedding, perform similarity search on qdrant and getting the text based data, now passing that text retrieved from qdrant and query_text to the OpenAI client)]
-  RP --> FR[final response\n(main.py)]
+  FE["file_extractor<br>(extracts text/content from document)"] --> EM["embedder<br>(generates embeddings of the text)"]
+  EM --> DF["DataFrame:main<br>(creating dataframe for the text, metadata and embeddings)"]
+  DF --> QI["qdrant_inserting<br>(connect to qdrant, create collection in qdrant, and insert embeddings into qdrant with df)"]
+  QI --> RP["rag<br>(convert the user query into embedding, perform similarity search on qdrant and retrieving textual data, then pass retrieved text and query_text to the OpenAI client)"]
+  RP --> FR["final response<br>(main.py)"]
 ```
-
 
 ```bash 
 file_extractor(extracts text/content from document) ---> embedder(generates embeddings of the text) ---> Dataframe:main(creating dataframe for the text, metadata and embeddings) ---> qdrant_inserting(connect to qdrant, create collection in qdrant, and insert embeddings into qdrant with df) ---> rag(convert the user query into embedding, perform similarity search on qdrant and getting the text based data, Now passing that text retrieved fromt qdrant and query_text to the openAI client) ---> final response(main.py)
