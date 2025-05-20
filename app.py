@@ -9,45 +9,23 @@ from rag import rag_pipeline
 from qdrant_inserting import connect_to_qdrant, create_qdrant_collection, insert_embeddings_to_qdrant
 
 st.set_page_config(
-    page_title="Santhosh Insight Engine",
+    page_title="AskMyDoc AI",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-@st.cache_data(show_spinner=False)
-def index_document():
-    with open("Santhosh_Bio.docx", "rb") as dfp:
-        content = dfp.read()
-    with open("indexed_doc.docx", "wb") as tmp:
-        tmp.write(content)
-    documents = extract_text_from_document("indexed_doc.docx")
-    file_text = " ".join(doc.page_content for doc in documents).replace("\n", " ")
-    embeddings = generate_embeddings(file_text)
-    if isinstance(embeddings, torch.Tensor):
-        embeddings = embeddings.cpu().numpy().tolist()
-    df = pd.DataFrame({
-        'text': [file_text],
-        'metadata': [{'title': 'Overview', 'summary': 'A brief summary of Overview'}],
-        'embeddings': [embeddings[0]]
-    })
-    client = connect_to_qdrant()
-    create_qdrant_collection(client, "collection")
-    insert_embeddings_to_qdrant(df, client, "collection")
-    return True
-
-index_document()
-
-# Custom CSS for futuristic UI
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Roboto:wght@400;500;700&display=swap');
+
     html, body, [class*="css"]  {
       background-color: #0a0a0a;
       color: #e0e0e0;
-      font-family: 'Orbitron', sans-serif;
+      font-family: 'Roboto', sans-serif;
     }
     .title {
+      font-family: 'Audiowide', cursive;
       font-size: 60px;
       font-weight: 700;
       text-align: center;
@@ -62,6 +40,7 @@ st.markdown(
       to { text-shadow: 0 0 20px #0070ff, 0 0 30px #0070ff; }
     }
     .stButton>button {
+      font-family: 'Roboto', sans-serif;
       background: linear-gradient(90deg, #00d4ff, #0066ff);
       border: none;
       border-radius: 12px;
@@ -70,7 +49,7 @@ st.markdown(
       height: 48px;
       width: 100%;
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 500;
       cursor: pointer;
       transition: box-shadow 0.3s ease;
     }
@@ -78,6 +57,7 @@ st.markdown(
       box-shadow: 0 0 12px rgba(0, 212, 255, 1), 0 0 24px rgba(0, 102, 255, 1);
     }
     .stTextInput>div>div>input {
+      font-family: 'Roboto', sans-serif;
       background-color: #1e1e1e;
       border: 1px solid #333333;
       border-radius: 8px;
@@ -93,6 +73,9 @@ st.markdown(
       margin-top: 20px;
       animation: fadeIn 0.5s ease-in-out;
     }
+    .response-card h4, .response-card p {
+      font-family: 'Roboto', sans-serif;
+    }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -102,30 +85,56 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Main interface
-st.markdown("<div class='title'>🚀 Santhosh Insight Engine</div>", unsafe_allow_html=True)
+st.markdown("<div class='title'>🚀 AskMyDoc AI</div>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Input section
-query = st.text_input("Ask about Santhosh", placeholder="e.g. Where is Santhosh working now?")
-get_answer = st.button("Get Answer")
+uploaded_file = st.file_uploader(
+    label="Upload your document",
+    type=["pdf", "docx", "txt"],
+    help="Supported formats: PDF, DOCX, TXT"
+)
 
-# Response section
-if get_answer and query:
-    st.markdown("<div class='response-card'>", unsafe_allow_html=True)
-    st.markdown(f"<p>Question:</p><p>{query}</p>", unsafe_allow_html=True)
-    with st.spinner("Processing your question..."):
-        buf = io.StringIO()
-        old_stdout = sys.stdout
-        sys.stdout = buf
-        result = rag_pipeline(query)
-        sys.stdout = old_stdout
-        answer = result if result else buf.getvalue().strip()
-        if not answer:
-            answer = "No answer returned. Check your RAG pipeline implementation."
-    st.markdown(f"<p>{answer}</p>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+def process_and_index(file_bytes, filename):
+    tmp_path = f"uploaded_{filename}"
+    with open(tmp_path, "wb") as f:
+        f.write(file_bytes)
+    documents = extract_text_from_document(tmp_path)
+    file_text = " ".join(doc.page_content for doc in documents).replace("\n", " ")
+    embeddings = generate_embeddings(file_text)
+    if isinstance(embeddings, torch.Tensor):
+        embeddings = embeddings.cpu().numpy().tolist()
+    df = pd.DataFrame({
+        'text': [file_text],
+        'metadata': [{'title': filename, 'summary': ''}],
+        'embeddings': [embeddings[0]]
+    })
+    client = connect_to_qdrant()
+    try:
+        client.delete_collection("collection")
+    except Exception:
+        pass
+    create_qdrant_collection(client, "collection")
+    insert_embeddings_to_qdrant(df, client, "collection")
 
-# Footer
+if uploaded_file:
+    st.success(f"File '{uploaded_file.name}' uploaded and indexed.")
+    file_bytes = uploaded_file.getvalue()
+    process_and_index(file_bytes, uploaded_file.name)
+    query = st.text_input("Ask anything about the uploaded document:")
+    if st.button("Get Answer") and query:
+        st.markdown("<div class='response-card'>", unsafe_allow_html=True)
+        st.markdown(f"<p>Question:</p><p>{query}</p>", unsafe_allow_html=True)
+        with st.spinner("Processing your question..."):
+            buf = io.StringIO()
+            old_stdout = sys.stdout
+            sys.stdout = buf
+            result = rag_pipeline(query)
+            sys.stdout = old_stdout
+            answer = result if result else buf.getvalue().strip()
+            if not answer:
+                answer = "No answer returned. Check your RAG pipeline implementation."
+        st.markdown(f"<p>{answer}</p>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
 st.markdown("---")
-st.markdown("<p style='text-align:center; color:#555555'>Built by Santhosh__rony</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#555555; font-family: Roboto, sans-serif;'>Built by Santhosh__rony</p>", unsafe_allow_html=True)
