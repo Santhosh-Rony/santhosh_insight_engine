@@ -21,6 +21,8 @@ It uses a custom RAG (Retrieval-Augmented Generation) pipeline to extract, embed
 
 ```bash 
 file_extractor(extracts text/content from document) ---> embedder(generates embeddings of the text) ---> Dataframe:main(creating dataframe for the text, metadata and embeddings) ---> qdrant_inserting(connect to qdrant, create collection in qdrant, and insert embeddings into qdrant with df) ---> rag(convert the user query into embedding, perform similarity search on qdrant and getting the text based data, Now passing that text retrieved fromt qdrant and query_text to the openAI client) ---> final response(main.py)
+![image](https://github.com/user-attachments/assets/edbd4311-b0c9-497c-9543-5da5adf9ec3f)
+
 ```
 ---
 
