@@ -30,8 +30,11 @@ file_extractor(extracts text/content from document) ---> embedder(generates embe
 - **Docker** installed and running on your machine
 - Pull and run Qdrant using Docker:
 
-```bash
-docker run -p 6333:6333 qdrant/qdrant
+```bash 1.Pull 2.Only using HTTP API 3.Using both HTTP and gRPC APIs (choose explictly)
+docker pull qdrant/qdrant
+docker run -p 6333:6333 qdrant/
+docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant  
+
 
 📦 Install Dependencies
 pip install -r requirements.txt
