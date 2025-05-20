@@ -19,32 +19,7 @@ It uses a custom RAG (Retrieval-Augmented Generation) pipeline to extract, embed
 
 ## 🧱 Architecture Overview
 
-Santhosh_Bio.docx
-│
-▼
-[Text Extraction]
-file_extractor.py
-│
-▼
-[Generate Embedding]
-embedder.py
-│
-▼
-[Store in Vector DB]
-qdrant_inserting.py (Qdrant)
-│
-▼
-[app.py]
-│
-▼
-[User Query]
-│
-▼
-[Retrieve Relevant Context]
-rag_qdrant.py
-│
-▼
-[Answer Generation]
+file_extractor(extracts text/content from document) ---> embedder(generates embeddings of the text) ---> Dataframe:main(creating dataframe for the text, metadata and embeddings) ---> qdrant_inserting(connect to qdrant, create collection in qdrant, and insert embeddings into qdrant with df) ---> rag(convert the user query into embedding, perform similarity search on qdrant and getting the text based data, Now passing that text retrieved fromt qdrant and query_text to the openAI client) ---> final response(main.py)
 
 ---
 
@@ -56,8 +31,7 @@ rag_qdrant.py
 - Pull and run Qdrant using Docker:
 
 ```bash
-docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
-Make sure Qdrant is available at http://localhost:6333 before launching the app.
+docker run -p 6333:6333 qdrant/qdrant
 
 📦 Install Dependencies
 pip install -r requirements.txt
@@ -71,4 +45,5 @@ sentence-transformers
 python-docx
 
 ▶️ Run the App
-streamlit run app.py
+python3 main.py (casual)
+streamlit run app.py (streamlit)
